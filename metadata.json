@@ -1,0 +1,6 @@
+{
+  "name": "전령 비둘기 편지 키오스크 (Pigeon Post Kiosk)",
+  "description": "이메일과 전화번호로 마음을 전하는 아날로그 감성 비둘기 편지 배달 키오스크. 지도 기반 비행 시뮬레이션 및 편지 펼침 연출.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

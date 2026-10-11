@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-serif {
+    font-family: 'Nanum Myeongjo', serif;
+  }
+  .font-pen {
+    font-family: 'Nanum Pen Script', cursive;
+  }
+  .font-display {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+/* Print stylesheet for clean letter printing */
+@media print {
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  body,
+  main {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
