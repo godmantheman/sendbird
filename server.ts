@@ -124,6 +124,23 @@ app.post('/api/send-email', async (req: Request<{}, {}, SendEmailRequestBody>, r
   // If real Resend API key is present
   if (resendApiKey && resendApiKey !== 'MY_RESEND_API_KEY') {
     try {
+      let fromAddress = process.env.RESEND_FROM_EMAIL?.trim() || 'Pigeon Post <onboarding@resend.dev>';
+
+      // If user put a personal @gmail.com or @naver.com address as sender, Resend will reject it
+      // unless sent from onboarding@resend.dev with reply_to set to their address
+      let replyToAddress = undefined;
+      if (
+        fromAddress.includes('@gmail.com') ||
+        fromAddress.includes('@naver.com') ||
+        fromAddress.includes('@daum.net') ||
+        fromAddress.includes('@kakao.com')
+      ) {
+        replyToAddress = fromAddress;
+        fromAddress = 'Pigeon Post <onboarding@resend.dev>';
+      } else if (!fromAddress.includes('<') && fromAddress.includes('@')) {
+        fromAddress = `Pigeon Post <${fromAddress}>`;
+      }
+
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -131,8 +148,9 @@ app.post('/api/send-email', async (req: Request<{}, {}, SendEmailRequestBody>, r
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.RESEND_FROM_EMAIL || 'Pigeon Post <onboarding@resend.dev>',
+          from: fromAddress,
           to: [to],
+          reply_to: replyToAddress,
           subject: `🕊️ [${senderName}]님의 비둘기 편지가 도착했습니다: ${subject}`,
           html: emailHtml,
         }),
@@ -154,12 +172,11 @@ app.post('/api/send-email', async (req: Request<{}, {}, SendEmailRequestBody>, r
       return;
     } catch (err: unknown) {
       console.error('Resend email error:', err);
-      // Fallback response with helpful diagnostic
       res.json({
         success: true,
         provider: 'resend_fallback',
         isLive: false,
-        message: `Resend 발송 시도됨 (도메인/키 확인 필요). 시뮬레이션 모드로 정상 배달 완료 처리되었습니다.`,
+        message: `Resend 발송 시도됨 (onboarding@resend.dev 무료 샌드박스 정책상 가입 이메일로 발송 권장). 시뮬레이션 수신함에 정상 보관되었습니다.`,
         error: err instanceof Error ? err.message : String(err),
       });
       return;
